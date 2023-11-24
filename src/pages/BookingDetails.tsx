@@ -1,7 +1,8 @@
 import { BookingEditPanel } from '@/components/BookingEditPanel';
 import { PageTitle } from '@/components/PageTitle';
-import { queryClient } from '@/contexts/apiClientContext';
+
 import { useApiClient } from '@/hooks/useApiClient';
+import { queryClient } from '@/lib/utils';
 import { BookingParams } from '@/schemas/booking.schema';
 import { useQuery } from 'react-query';
 import { useNavigate, useParams } from 'react-router-dom';

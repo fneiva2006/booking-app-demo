@@ -2,7 +2,10 @@ import { Booking } from '@/types/models.types';
 import { type ClassValue, clsx } from 'clsx';
 import { addDays, isWithinInterval } from 'date-fns';
 import { DateRange } from 'react-day-picker';
+import { QueryClient } from 'react-query';
 import { twMerge } from 'tailwind-merge';
+
+export const queryClient = new QueryClient();
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));

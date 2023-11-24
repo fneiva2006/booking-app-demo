@@ -11,7 +11,7 @@ export const MainLayout: React.FC = () => {
     });
   };
 
-  if (location.pathname === '/') {
+  if (['/', ''].includes(location.pathname)) {
     return <Navigate to='/properties' />;
   }
 

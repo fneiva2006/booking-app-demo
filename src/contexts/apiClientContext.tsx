@@ -2,15 +2,20 @@
 
 import { createContext, useState } from 'react';
 import { Booking, Property } from '../types/models.types';
-import { locationFixtures as propertyFixtures } from '../lib/fixtures';
+
 import { faker } from '@faker-js/faker';
 import { DateRange } from 'react-day-picker';
 import { getPropertyOccupiedPeriods, rangeConflict } from '@/lib/utils';
-import { QueryClient } from 'react-query';
+import {
+  initializeStorage,
+  loadSavedBookings,
+  loadSavedProperties,
+  storeBookings,
+} from '@/lib/sessionStorageManager';
+
+initializeStorage();
 
 export type BookingEditParams = Omit<Booking, 'id' | 'userId'>;
-
-export const queryClient = new QueryClient();
 
 export type ApiClient = {
   listProperties: (period?: DateRange) => Promise<Property[]>;
@@ -32,37 +37,14 @@ export type BrowserDataProviderProps = {
   children?: React.ReactNode;
 };
 
-const savedProperties = sessionStorage.getItem('properties');
-
-if (!savedProperties) {
-  sessionStorage.setItem('properties', JSON.stringify(propertyFixtures));
-}
-
-const savedBookings = sessionStorage.getItem('bookings');
-
-function parseWithDate(jsonString: string) {
-  const reDateDetect = /(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/; // startswith: 2015-04-29T22:06:55
-  const resultObject = JSON.parse(jsonString, (_: string, value: unknown) => {
-    if (typeof value == 'string' && reDateDetect.exec(value)) {
-      return new Date(value);
-    }
-    return value;
-  });
-  return resultObject;
-}
-
 export const ApiClientProvider: React.FC<BrowserDataProviderProps> = ({
   children,
 }) => {
   const [userId] = useState(faker.string.uuid());
 
-  const [bookings, setBookings] = useState<Booking[]>(
-    parseWithDate(savedBookings ?? '[]')
-  );
+  const [bookings, setBookings] = useState<Booking[]>(loadSavedBookings());
 
-  const [properties] = useState<Property[]>(
-    parseWithDate(savedProperties ?? '')
-  );
+  const [properties] = useState<Property[]>(loadSavedProperties());
 
   //#region Bookings
 
@@ -96,10 +78,7 @@ export const ApiClientProvider: React.FC<BrowserDataProviderProps> = ({
 
     setBookings((pv) => [...pv, bookingToCreate]);
 
-    sessionStorage.setItem(
-      'bookings',
-      JSON.stringify([...bookings, bookingToCreate])
-    );
+    storeBookings([...bookings, bookingToCreate]);
 
     return Promise.resolve(bookingToCreate);
   };
@@ -115,7 +94,7 @@ export const ApiClientProvider: React.FC<BrowserDataProviderProps> = ({
     bookingToUpdate.startDate = booking.startDate;
     bookingToUpdate.endDate = booking.endDate;
 
-    sessionStorage.setItem('bookings', JSON.stringify(bookings));
+    storeBookings(bookings);
 
     return Promise.resolve(bookingToUpdate);
   };
@@ -128,7 +107,7 @@ export const ApiClientProvider: React.FC<BrowserDataProviderProps> = ({
     const bookingsToSave = bookings.filter((b) => b.id !== id);
 
     setBookings(bookingsToSave);
-    sessionStorage.setItem('bookings', JSON.stringify(bookingsToSave));
+    storeBookings(bookingsToSave);
 
     return Promise.resolve();
   };

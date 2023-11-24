@@ -4,7 +4,8 @@ import './index.css';
 import { RouterProvider } from 'react-router-dom';
 import { router } from './routes';
 import { QueryClientProvider } from 'react-query';
-import { ApiClientProvider, queryClient } from './contexts/apiClientContext';
+import { ApiClientProvider } from './contexts/apiClientContext';
+import { queryClient } from './lib/utils';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
