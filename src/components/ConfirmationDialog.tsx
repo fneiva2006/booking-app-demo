@@ -24,7 +24,7 @@ export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
   return (
     <Dialog>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent>
+      <DialogContent className='w-80 sm:w-full'>
         <DialogHeader>
           <DialogTitle>Are you sure absolutely sure?</DialogTitle>
           <DialogDescription>

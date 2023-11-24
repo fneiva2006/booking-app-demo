@@ -63,13 +63,16 @@ export const BookingEditPanel: React.FC<BookingEditPanelProps> = ({
       {property && <PropertyCard {...property} />}
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
-          <div className='flex flex-col items-center gap-y-6 pt-2'>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className='space-y-8 w-full px-6'
+        >
+          <div className='flex flex-col items-center gap-y-6 pt-2 w-full'>
             <FormField
               control={form.control}
               name='dateRange'
               render={({ field }) => (
-                <FormItem>
+                <FormItem className='w-full px-0'>
                   <FormLabel>Change period?</FormLabel>
                   <DateRangePicker
                     dateRange={field.value}
@@ -103,7 +106,7 @@ export const BookingEditPanel: React.FC<BookingEditPanelProps> = ({
             {onDelete && (
               <ConfirmationDialog onConfirm={onDelete}>
                 <Button
-                  className='w-96 border-red-700 text-red-700 hover:bg-red-700 hover:text-white'
+                  className='w-full sm:w-96 border-red-700 text-red-700 hover:bg-red-700 hover:text-white'
                   variant={'outline'}
                 >
                   Delete

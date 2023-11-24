@@ -39,7 +39,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
   }, [onSelect, range]);
 
   return (
-    <div className={cn('grid gap-2 w-96', className)}>
+    <div className={cn('grid gap-2 w-full', className)}>
       <Popover>
         <PopoverTrigger asChild>
           <Button
