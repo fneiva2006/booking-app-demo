@@ -42,17 +42,13 @@ export const BookingEditPanel: React.FC<BookingEditPanelProps> = ({
 
   const form = useForm<BookingParams>({
     resolver: zodResolver(bookingSchema),
-    defaultValues: { dateRange: {} },
+    defaultValues: {
+      dateRange: {
+        from: from ? new Date(from) : undefined,
+        to: to ? new Date(to) : undefined,
+      },
+    },
   });
-
-  useEffect(() => {
-    if (to && from) {
-      form.setValue('dateRange', {
-        to: new Date(to),
-        from: new Date(from),
-      });
-    }
-  }, [to, from, form]);
 
   useEffect(() => {
     if (property?.id) {
