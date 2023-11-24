@@ -4,6 +4,20 @@ This React project implements a responsive web app that simulates a property boo
 
 Since there is no back-end, all data is persisted in session storage, as if it was a database.
 
+# Screenshots
+
+## Desktop
+
+<img width="600" alt="image" src="https://github.com/fneiva2006/booking-app-demo/assets/21023652/0ad25696-ef20-488e-b441-4b8be7dab3ef">
+<img width="600" alt="image" src="https://github.com/fneiva2006/booking-app-demo/assets/21023652/24f976e4-1542-4fe2-af44-8b617f67e2e3">
+
+
+## Mobile
+
+<img width="180" alt="image" src="https://github.com/fneiva2006/booking-app-demo/assets/21023652/db5fdcdf-5a3c-4901-9f66-f3d3eebc2cb6">
+<img width="180" alt="image" src="https://github.com/fneiva2006/booking-app-demo/assets/21023652/11233962-a8ee-41e1-a423-f763fa112ff1">
+
+
 # How to run
 
 ```sh
