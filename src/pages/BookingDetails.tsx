@@ -19,7 +19,7 @@ export const BookingDetails = () => {
   });
 
   const onSubmit = (values: BookingParams) => {
-    apiClient.createBooking({
+    apiClient.updateBooking(booking?.id ?? "", {
       endDate: values.dateRange.to,
       startDate: values.dateRange.from,
       propertyId: values.propertyId,

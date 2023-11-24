@@ -1,10 +1,10 @@
-import { DateRangePicker } from "@/components/DateRangePicker";
+import { DateRangePicker } from '@/components/DateRangePicker';
 
-import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { BookingParams, bookingSchema } from "@/schemas/booking.schema";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { BookingParams, bookingSchema } from '@/schemas/booking.schema';
 import {
   Form,
   FormDescription,
@@ -12,12 +12,13 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Button } from "@/components/ui/button";
+} from '@/components/ui/form';
+import { Button } from '@/components/ui/button';
 
-import { PropertyCard } from "@/components/PropertyCard";
+import { PropertyCard } from '@/components/PropertyCard';
 
-import { Property } from "@/types/models.types";
+import { Property } from '@/types/models.types';
+import { ConfirmationDialog } from './ConfirmationDialog';
 
 export type BookingEditPanelProps = {
   property?: Property;
@@ -46,7 +47,7 @@ export const BookingEditPanel: React.FC<BookingEditPanelProps> = ({
 
   useEffect(() => {
     if (to && from) {
-      form.setValue("dateRange", {
+      form.setValue('dateRange', {
         to: new Date(to),
         from: new Date(from),
       });
@@ -55,22 +56,22 @@ export const BookingEditPanel: React.FC<BookingEditPanelProps> = ({
 
   useEffect(() => {
     if (property?.id) {
-      form.setValue("propertyId", property.id, {
+      form.setValue('propertyId', property.id, {
         shouldValidate: true,
       });
     }
   }, [form, property]);
 
   return (
-    <div className="flex flex-col justify-center items-center pb-8">
+    <div className='flex flex-col justify-center items-center pb-8'>
       {property && <PropertyCard {...property} />}
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          <div className="flex flex-col items-center gap-y-6 pt-2">
+        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
+          <div className='flex flex-col items-center gap-y-6 pt-2'>
             <FormField
               control={form.control}
-              name="dateRange"
+              name='dateRange'
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Change period?</FormLabel>
@@ -79,38 +80,39 @@ export const BookingEditPanel: React.FC<BookingEditPanelProps> = ({
                     onSelect={field.onChange}
                   />
                   <FormDescription>
-                    You can manage email addresses in your{" "}
+                    You can manage email addresses in your{' '}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            <div className="flex flex-row gap-x-6 justify-end">
-              <Button variant={"outline"} onClick={onCancel}>
+            <div className='flex flex-row gap-x-6 justify-end'>
+              <Button variant={'outline'} onClick={onCancel}>
                 Cancel
               </Button>
               <Button
-                className="bg-blue-700 hover:bg-blue-600"
+                className='bg-blue-700 hover:bg-blue-600'
                 disabled={
                   !form.formState.isValid ||
                   (onDelete && !form.formState.isDirty)
                 }
-                type="submit"
+                type='submit'
               >
-                {isCreating ? "Create" : "Update"}
+                {isCreating ? 'Create' : 'Update'}
               </Button>
             </div>
           </div>
-          <div className="w-full flex justify-center">
+          <div className='w-full flex justify-center'>
             {onDelete && (
-              <Button
-                className="w-96 border-red-700 text-red-700 hover:bg-red-700 hover:text-white"
-                variant={"outline"}
-                onClick={onDelete}
-              >
-                Delete
-              </Button>
+              <ConfirmationDialog onConfirm={onDelete}>
+                <Button
+                  className='w-96 border-red-700 text-red-700 hover:bg-red-700 hover:text-white'
+                  variant={'outline'}
+                >
+                  Delete
+                </Button>
+              </ConfirmationDialog>
             )}
           </div>
         </form>

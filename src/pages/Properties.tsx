@@ -8,14 +8,14 @@ import { Label } from "@/components/ui/label";
 import { PageTitle } from "@/components/PageTitle";
 
 export const Properties: React.FC = () => {
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
+
   const apiClient = useApiClient();
 
   const { data, isLoading } = useQuery({
-    queryKey: "properties",
-    queryFn: () => apiClient.listProperties(),
+    queryKey: ["properties", dateRange],
+    queryFn: () => apiClient.listProperties(dateRange),
   });
-
-  const [dateRange, setDate] = useState<DateRange | undefined>();
 
   const locationItems = data?.map((property) => (
     <PropertyCard
@@ -26,6 +26,12 @@ export const Properties: React.FC = () => {
     />
   ));
 
+  const handleDateRangeChange = (range?: DateRange) => {
+    if (range?.from && range?.to) {
+      setDateRange(range);
+    }
+  };
+
   return (
     <div className="flex flex-col justify-center items-center">
       <PageTitle title="Properties available" />
@@ -33,7 +39,10 @@ export const Properties: React.FC = () => {
         <Label className="pl-1" htmlFor="date">
           Filter by period
         </Label>
-        <DateRangePicker dateRange={dateRange} onSelect={setDate} />
+        <DateRangePicker
+          dateRange={dateRange}
+          onSelect={handleDateRangeChange}
+        />
       </div>
 
       <ul className="flex flex-col md:grid md:grid-cols-2 lg:grid-cols-3 sm:gap-x-6 gap-y-6 p-6 justify-center">

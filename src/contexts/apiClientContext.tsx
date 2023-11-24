@@ -5,7 +5,7 @@ import { Booking, Property } from "../types/models.types";
 import { locationFixtures as propertyFixtures } from "../lib/fixtures";
 import { faker } from "@faker-js/faker";
 import { DateRange } from "react-day-picker";
-import { debug } from "console";
+import { addDays, isWithinInterval } from "date-fns";
 
 export type BookingEditParams = Omit<Booking, "id" | "userId">;
 
@@ -16,7 +16,10 @@ export type ApiClient = {
   listBookings: () => Promise<Booking[]>;
   getBooking: (id: string) => Promise<Booking | undefined>;
   createBooking: (booking: BookingEditParams) => Promise<Booking>;
-  updateBooking: (id: string, booking: Booking) => Promise<Booking | undefined>;
+  updateBooking: (
+    id: string,
+    booking: BookingEditParams
+  ) => Promise<Booking | undefined>;
   deleteBooking: (id: string | undefined) => Promise<void>;
 };
 
@@ -122,10 +125,6 @@ export const ApiClientProvider: React.FC<BrowserDataProviderProps> = ({
     const bookingsToSave = bookings.filter((b) => b.id !== id);
 
     setBookings(bookingsToSave);
-
-    debugger;
-
-    sessionStorage.removeItem("bookings");
     sessionStorage.setItem("bookings", JSON.stringify(bookingsToSave));
 
     return Promise.resolve();
@@ -152,20 +151,45 @@ export const ApiClientProvider: React.FC<BrowserDataProviderProps> = ({
       }));
   };
 
-  const listProperties = (range?: DateRange, excludedUsers: string[] = []) => {
-    let filteredProperties = properties.filter((l) => {
-      if (!range?.from && !range?.to) {
-        return true;
+  const rangeConflict = (range: DateRange, periods: DateRange[]) => {
+    for (const period of periods) {
+      if (!period.from || !period.to || !range.from || !range.to) {
+        continue;
       }
 
+      period.from.setHours(0, 0, 0, 0);
+      period.to.setHours(0, 0, 0, 0);
+
+      const fromWithinInterval =
+        range.from &&
+        isWithinInterval(range.from, {
+          start: period.from,
+          end: addDays(period.to, -1),
+        });
+
+      const toWithinInterval =
+        range.to &&
+        isWithinInterval(range.to, {
+          start: addDays(period.from, 1),
+          end: period.to,
+        });
+
+      return fromWithinInterval || toWithinInterval;
+    }
+  };
+
+  const listProperties = (range?: DateRange, excludedUsers: string[] = []) => {
+    if (!range?.from && !range?.to) {
+      return Promise.resolve(properties);
+    }
+
+    const filteredProperties = properties.filter((l) => {
       const occupiedPeriodsForProperty = getPropertyOccupiedPeriods(
         l.id,
         excludedUsers
       );
 
-      console.log(occupiedPeriodsForProperty);
-
-      return true;
+      return !rangeConflict(range, occupiedPeriodsForProperty);
     });
 
     return Promise.resolve(filteredProperties);
