@@ -65,7 +65,7 @@ export const BookingEditPanel: React.FC<BookingEditPanelProps> = ({
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className='space-y-8 w-full px-6'
+          className='space-y-8 w-full px-6 sm:px-0'
         >
           <div className='flex flex-col items-center gap-y-6 pt-2 w-full'>
             <FormField
