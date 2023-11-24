@@ -1,13 +1,16 @@
-"use client";
+'use client';
 
-import { createContext, useState } from "react";
-import { Booking, Property } from "../types/models.types";
-import { locationFixtures as propertyFixtures } from "../lib/fixtures";
-import { faker } from "@faker-js/faker";
-import { DateRange } from "react-day-picker";
-import { addDays, isWithinInterval } from "date-fns";
+import { createContext, useState } from 'react';
+import { Booking, Property } from '../types/models.types';
+import { locationFixtures as propertyFixtures } from '../lib/fixtures';
+import { faker } from '@faker-js/faker';
+import { DateRange } from 'react-day-picker';
+import { getPropertyOccupiedPeriods, rangeConflict } from '@/lib/utils';
+import { QueryClient } from 'react-query';
 
-export type BookingEditParams = Omit<Booking, "id" | "userId">;
+export type BookingEditParams = Omit<Booking, 'id' | 'userId'>;
+
+export const queryClient = new QueryClient();
 
 export type ApiClient = {
   listProperties: (period?: DateRange) => Promise<Property[]>;
@@ -29,18 +32,18 @@ export type BrowserDataProviderProps = {
   children?: React.ReactNode;
 };
 
-const savedProperties = sessionStorage.getItem("properties");
+const savedProperties = sessionStorage.getItem('properties');
 
 if (!savedProperties) {
-  sessionStorage.setItem("properties", JSON.stringify(propertyFixtures));
+  sessionStorage.setItem('properties', JSON.stringify(propertyFixtures));
 }
 
-const savedBookings = sessionStorage.getItem("bookings");
+const savedBookings = sessionStorage.getItem('bookings');
 
 function parseWithDate(jsonString: string) {
   const reDateDetect = /(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/; // startswith: 2015-04-29T22:06:55
-  const resultObject = JSON.parse(jsonString, (key: string, value: unknown) => {
-    if (typeof value == "string" && reDateDetect.exec(value)) {
+  const resultObject = JSON.parse(jsonString, (_: string, value: unknown) => {
+    if (typeof value == 'string' && reDateDetect.exec(value)) {
       return new Date(value);
     }
     return value;
@@ -54,11 +57,11 @@ export const ApiClientProvider: React.FC<BrowserDataProviderProps> = ({
   const [userId] = useState(faker.string.uuid());
 
   const [bookings, setBookings] = useState<Booking[]>(
-    parseWithDate(savedBookings ?? "[]")
+    parseWithDate(savedBookings ?? '[]')
   );
 
   const [properties] = useState<Property[]>(
-    parseWithDate(savedProperties ?? "")
+    parseWithDate(savedProperties ?? '')
   );
 
   //#region Bookings
@@ -94,7 +97,7 @@ export const ApiClientProvider: React.FC<BrowserDataProviderProps> = ({
     setBookings((pv) => [...pv, bookingToCreate]);
 
     sessionStorage.setItem(
-      "bookings",
+      'bookings',
       JSON.stringify([...bookings, bookingToCreate])
     );
 
@@ -105,14 +108,14 @@ export const ApiClientProvider: React.FC<BrowserDataProviderProps> = ({
     const bookingToUpdate = bookings.find((b) => b.id === id);
 
     if (!bookingToUpdate) {
-      throw new Error("Booking not found!");
+      throw new Error('Booking not found!');
     }
 
     bookingToUpdate.propertyId = booking.propertyId;
     bookingToUpdate.startDate = booking.startDate;
     bookingToUpdate.endDate = booking.endDate;
 
-    sessionStorage.setItem("bookings", JSON.stringify(bookings));
+    sessionStorage.setItem('bookings', JSON.stringify(bookings));
 
     return Promise.resolve(bookingToUpdate);
   };
@@ -125,7 +128,7 @@ export const ApiClientProvider: React.FC<BrowserDataProviderProps> = ({
     const bookingsToSave = bookings.filter((b) => b.id !== id);
 
     setBookings(bookingsToSave);
-    sessionStorage.setItem("bookings", JSON.stringify(bookingsToSave));
+    sessionStorage.setItem('bookings', JSON.stringify(bookingsToSave));
 
     return Promise.resolve();
   };
@@ -137,47 +140,6 @@ export const ApiClientProvider: React.FC<BrowserDataProviderProps> = ({
   const getProperty = (id: string) =>
     Promise.resolve(properties.find((p) => p.id === id));
 
-  const getPropertyOccupiedPeriods = (
-    propertyId: string,
-    excludedUsers: string[]
-  ): DateRange[] => {
-    return bookings
-      .filter(
-        (b) => b.propertyId === propertyId && !excludedUsers.includes(b.userId)
-      )
-      .map((b) => ({
-        from: new Date(b.startDate),
-        to: new Date(b.endDate),
-      }));
-  };
-
-  const rangeConflict = (range: DateRange, periods: DateRange[]) => {
-    for (const period of periods) {
-      if (!period.from || !period.to || !range.from || !range.to) {
-        continue;
-      }
-
-      period.from.setHours(0, 0, 0, 0);
-      period.to.setHours(0, 0, 0, 0);
-
-      const fromWithinInterval =
-        range.from &&
-        isWithinInterval(range.from, {
-          start: period.from,
-          end: addDays(period.to, -1),
-        });
-
-      const toWithinInterval =
-        range.to &&
-        isWithinInterval(range.to, {
-          start: addDays(period.from, 1),
-          end: period.to,
-        });
-
-      return fromWithinInterval || toWithinInterval;
-    }
-  };
-
   const listProperties = (range?: DateRange, excludedUsers: string[] = []) => {
     if (!range?.from && !range?.to) {
       return Promise.resolve(properties);
@@ -185,6 +147,7 @@ export const ApiClientProvider: React.FC<BrowserDataProviderProps> = ({
 
     const filteredProperties = properties.filter((l) => {
       const occupiedPeriodsForProperty = getPropertyOccupiedPeriods(
+        bookings,
         l.id,
         excludedUsers
       );
